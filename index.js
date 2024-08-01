@@ -28,14 +28,14 @@ async function run() {
     // --- adding user data
     app.patch("/api/v1/addUserData", async (req, res) => {
       const userData = req.body;
-      console.log('user before : ',userData);
+      // console.log('user before : ',userData);
       const filter = { email: req.body.email };
       const options = { upsert: true };
       // Remove the _id field if it exists in the request body
       if (userData._id) {
         delete userData._id;
       }
-      console.log('user after :  ', userData);
+      // console.log('user after :  ', userData);
       const update = { $set: userData };
       try {
         const result = await userDb.updateOne(filter, update, options);
@@ -46,6 +46,22 @@ async function run() {
       } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error updating user data", error });
+      }
+    });
+
+    //-- getting user info
+    app.get("/api/v1/userInfo/:email", async(req, res)=>{
+      const {email} = req.params ;
+      try {
+        const user = await userDb.findOne({ email });
+        if (user) {
+          res.status(200).json(user);
+        } else {
+          res.status(404).json({ message: "User not found" });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error retrieving user data", error });
       }
     });
 
